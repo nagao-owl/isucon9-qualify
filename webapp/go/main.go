@@ -455,6 +455,12 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func postInitialize(w http.ResponseWriter, r *http.Request) {
+	go func() {
+                if _, err := http.Get("http://localhost:9000/api/group/collect"); err != nil {
+			log.Printf("failed to communicate with pprotein: %v", err)
+		}
+	}()
+
 	ri := reqInitialize{}
 
 	err := json.NewDecoder(r.Body).Decode(&ri)
