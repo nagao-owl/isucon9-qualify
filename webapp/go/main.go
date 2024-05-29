@@ -63,8 +63,8 @@ var (
 	templates      *template.Template
 	dbx            *sqlx.DB
 	store          sessions.Store
-	categories     map[int]Category
-	categoryErrors map[int]struct{}
+	categories     = make(map[int]Category, 66)
+	categoryErrors = make(map[int]struct{}, 66)
 )
 
 type Config struct {
@@ -475,8 +475,6 @@ func postInitialize(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to communicate with pprotein: %v", err)
 		}
 	}()
-	categories = make(map[int]Category, 66)
-	categoryErrors = make(map[int]struct{}, 66)
 
 	ri := reqInitialize{}
 
