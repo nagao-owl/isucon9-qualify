@@ -60,9 +60,10 @@ const (
 )
 
 var (
-	templates *template.Template
-	dbx       *sqlx.DB
-	store     sessions.Store
+	templates  *template.Template
+	dbx        *sqlx.DB
+	store      sessions.Store
+	categories map[int]Category
 )
 
 type Config struct {
@@ -410,7 +411,11 @@ func getUserSimpleByID(q sqlx.Queryer, userID int64) (userSimple UserSimple, err
 }
 
 func getCategoryByID(q sqlx.Queryer, categoryID int) (category Category, err error) {
-	err = sqlx.Get(q, &category, "SELECT * FROM `categories` WHERE `id` = ?", categoryID)
+	category, ok := categories[categoryID]
+	if !ok {
+		err = sqlx.Get(q, &category, "SELECT * FROM `categories` WHERE `id` = ?", categoryID)
+		categories[categoryID] = category
+	}
 	if category.ParentID != 0 {
 		parentCategory, err := getCategoryByID(q, category.ParentID)
 		if err != nil {
@@ -456,7 +461,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 
 func postInitialize(w http.ResponseWriter, r *http.Request) {
 	go func() {
-                if _, err := http.Get("http://localhost:9000/api/group/collect"); err != nil {
+		if _, err := http.Get("http://localhost:9000/api/group/collect"); err != nil {
 			log.Printf("failed to communicate with pprotein: %v", err)
 		}
 	}()
