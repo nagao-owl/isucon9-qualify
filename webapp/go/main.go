@@ -404,6 +404,9 @@ func main() {
 		http.FileServer(http.Dir("../public")).ServeHTTP(w, r)
 	})
 
+	// pprotein
+	go standalone.Integrate(":20000")
+
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
 
@@ -502,7 +505,6 @@ func postInitialize(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to communicate with pprotein: %v", err)
 		}
 	}()
-	standalone.Integrate(":19000")
 
 	ri := reqInitialize{}
 
