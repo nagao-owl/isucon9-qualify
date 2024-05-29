@@ -414,15 +414,16 @@ func getCategoryByID(q sqlx.Queryer, categoryID int) (category Category, err err
 	category, ok := categories[categoryID]
 	if !ok {
 		err = sqlx.Get(q, &category, "SELECT * FROM `categories` WHERE `id` = ?", categoryID)
-		categories[categoryID] = category
 	}
 	if category.ParentID != 0 {
 		parentCategory, err := getCategoryByID(q, category.ParentID)
 		if err != nil {
+			categories[categoryID] = category
 			return category, err
 		}
 		category.ParentCategoryName = parentCategory.CategoryName
 	}
+	categories[categoryID] = category
 	return category, err
 }
 
