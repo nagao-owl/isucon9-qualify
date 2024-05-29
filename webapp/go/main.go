@@ -20,6 +20,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
+	"github.com/kaz/pprotein/integration/standalone"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -501,6 +502,7 @@ func postInitialize(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to communicate with pprotein: %v", err)
 		}
 	}()
+	standalone.Integrate(":19000")
 
 	ri := reqInitialize{}
 
