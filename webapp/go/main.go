@@ -60,10 +60,11 @@ const (
 )
 
 var (
-	templates  *template.Template
-	dbx        *sqlx.DB
-	store      sessions.Store
-	categories map[int]Category
+	templates      *template.Template
+	dbx            *sqlx.DB
+	store          sessions.Store
+	categories     map[int]Category
+	categoryErrors map[int]struct{}
 )
 
 type Config struct {
@@ -411,9 +412,17 @@ func getUserSimpleByID(q sqlx.Queryer, userID int64) (userSimple UserSimple, err
 }
 
 func getCategoryByID(q sqlx.Queryer, categoryID int) (category Category, err error) {
+	if _, ok := categoryErrors[categoryID]; ok {
+		return Category{}, sql.ErrNoRows
+	}
+
 	category, ok := categories[categoryID]
 	if !ok {
 		err = sqlx.Get(q, &category, "SELECT * FROM `categories` WHERE `id` = ?", categoryID)
+
+		if err != nil {
+			categoryErrors[categoryID] = struct{}{}
+		}
 	}
 	if category.ParentID != 0 {
 		parentCategory, err := getCategoryByID(q, category.ParentID)
@@ -466,6 +475,8 @@ func postInitialize(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to communicate with pprotein: %v", err)
 		}
 	}()
+	categories = make(map[int]Category, 66)
+	categoryErrors = make(map[int]struct{}, 66)
 
 	ri := reqInitialize{}
 
