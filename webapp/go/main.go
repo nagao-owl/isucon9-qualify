@@ -358,6 +358,7 @@ func main() {
 	conf.Passwd = password
 	conf.DBName = dbname
 	conf.ParseTime = true
+	conf.InterpolateParams = true
 
 	dbx, err = sqlx.Open("mysql", conf.FormatDSN())
 	if err != nil {
